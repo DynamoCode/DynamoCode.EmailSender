@@ -30,5 +30,8 @@ jobs:
     - name: Install dotnet lambda tools
       run: dotnet tool install -g Amazon.Lambda.Tools
 
-    - name: Build backend
+    - name: Build
       run: sam build
+
+    - name: Deploy 
+      run: sam deploy --role-arn ${{ secrets.AWS_ACCESS_ROLE_ARN }} --no-fail-on-empty-changeset 
