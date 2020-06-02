@@ -1,0 +1,56 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  SAM Template for email sender application. Contains a SQS queue and a Lambda function receiving SQS events.
+
+Parameters:
+  AppName:
+    Description: Name of the application, used to prefix the configuration
+    Type: String
+    Default: DynamoCode.EmailSender
+
+Globals:
+  Function:
+    Timeout: 10
+
+Resources:
+  
+  EmailSenderFunction:
+    Type: AWS::Serverless::Function 
+    Properties:
+      CodeUri: ./src/EmailSender/
+      Handler: EmailSender::EmailSender.Function::HandleSQSEvent
+      Runtime: dotnetcore3.1
+      Environment:
+        Variables:
+          DEBUG: False
+      Policies:
+        - Statement:
+          - Sid: SSMGetParametersPolicy
+            Effect: Allow
+            Action:
+            - ssm:GetParameter*
+            Resource: !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${AppName}*'
+      Events:
+        NewEmailEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt EmailSqsQueue.Arn
+            BatchSize: 10
+  
+  EmailSqsQueue:
+    Type: AWS::SQS::Queue
+
+Outputs:
+
+  EmailSqsQueue:
+    Description: "EmailSqsQueue SQS queue"
+    Value: !Ref EmailSqsQueue
+
+  EmailSenderFunction:
+    Description: "EmailSender Lambda Function ARN"
+    Value: !GetAtt EmailSenderFunction.Arn
+    
+  EmailSenderFunctionIamRole:
+    Description: "Implicit IAM Role created for EmailSender function"
+    Value: !GetAtt EmailSenderFunctionRole.Arn

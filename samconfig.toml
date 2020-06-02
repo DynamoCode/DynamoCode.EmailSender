@@ -1,0 +1,9 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "dynamocode-email-send"
+s3_bucket = "dynamocode-deployments"
+s3_prefix = "dynamocode-email-send"
+region = "us-east-1"
+capabilities = "CAPABILITY_IAM"
